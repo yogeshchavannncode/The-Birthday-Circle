@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /wishes/{wishId} {
+      // Wishes are intentionally public so everyone in the group can read them.
+      allow read: if true;
+
+      // Visitors are automatically signed in anonymously by the website.
+      // Limit recipients to the known member IDs and validate every field.
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll([
+          'recipientId', 'senderName', 'message', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'recipientId', 'senderName', 'message', 'createdAt'
+        ])
+        && request.resource.data.recipientId is string
+        && request.resource.data.recipientId in [
+          'depp', 'ban', 'shristi', 'nandini', 'ruby', 'amrit', 'ns',
+          'minnie', 'dot-sharma', 'satya', 'invention', 'coco', 'animesh'
+        ]
+        && request.resource.data.senderName is string
+        && request.resource.data.senderName.size() > 0
+        && request.resource.data.senderName.size() <= 50
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 500
+        // Require a trusted server timestamp, not a client-supplied date.
+        && request.resource.data.createdAt == request.time;
+
+      // Submitted wishes cannot be edited or removed by visitors.
+      allow update, delete: if false;
+    }
+  }
+}
