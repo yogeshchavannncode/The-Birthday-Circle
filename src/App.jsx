@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
-import { collection, addDoc, onSnapshot, query, serverTimestamp, where } from 'firebase/firestore';
-import { db, ensureAnonymousAuth } from './firebase';
-import { members, stateThemes } from './data/members.js';
+import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, where } from 'firebase/firestore';
+import { db } from './firebase';
+import { members, stateThemes } from './data/members';
 import { Cake, Share2, ArrowLeft, Send, Sparkles, Heart, AlertCircle, CheckCircle } from 'lucide-react';
 
 // --- UTILS ---
@@ -41,11 +41,11 @@ const ProfileCard = ({ member, daysLeft }) => {
   const isToday = daysLeft === 0;
 
   return (
-    <button
-      type="button"
+    <div 
       onClick={() => navigate(`/person/${member.id}`)}
-      aria-label={`Open ${member.name}'s birthday page`}
-      className={`relative w-full text-left scrapbook-shadow rounded-2xl p-6 cursor-pointer border-2 transition-transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-pink-300 ${theme}`}
+      onKeyDown={(e) => e.key === 'Enter' && navigate(`/person/${member.id}`)}
+      tabIndex={0}
+      className={`relative scrapbook-shadow rounded-2xl p-6 cursor-pointer border-2 transition-transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-pink-300 ${theme}`}
     >
       {isToday && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-bounce shadow-md">
@@ -67,7 +67,7 @@ const ProfileCard = ({ member, daysLeft }) => {
           </p>
         </div>
       </div>
-    </button>
+    </div>
   );
 };
 
@@ -86,7 +86,7 @@ const Home = () => {
           The Birthday Circle
         </h1>
         <p className="text-gray-600 text-lg md:text-xl font-medium">
-          13 people. Countless memories. One place to celebrate. 🎈
+          14 people. Countless memories. One place to celebrate. 🎈
         </p>
       </header>
 
@@ -125,8 +125,9 @@ const BirthdayPage = () => {
   useEffect(() => {
     if (!member) return;
     const q = query(
-      collection(db, "wishes"),
-      where("recipientId", "==", member.id)
+      collection(db, "wishes"), 
+      where("recipientId", "==", member.id),
+      orderBy("createdAt", "desc")
     );
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -134,12 +135,6 @@ const BirthdayPage = () => {
         id: doc.id,
         ...doc.data()
       }));
-      // Sort newest first on the client so this query does not need a composite index.
-      wishData.sort((a, b) => {
-        const aTime = a.createdAt?.toMillis?.() ?? 0;
-        const bTime = b.createdAt?.toMillis?.() ?? 0;
-        return bTime - aTime;
-      });
       setWishes(wishData);
     }, (err) => {
       console.error("Firestore listener error:", err);
@@ -179,11 +174,6 @@ const BirthdayPage = () => {
     setSuccess(false);
 
     try {
-      // Wait for the automatic anonymous Firebase session before writing.
-      const authenticated = await ensureAnonymousAuth();
-      if (!authenticated) {
-        throw new Error("Could not connect anonymously to Firebase. Please try again.");
-      }
       await addDoc(collection(db, "wishes"), {
         recipientId: member.id,
         senderName: name.trim() || "Someone special",
