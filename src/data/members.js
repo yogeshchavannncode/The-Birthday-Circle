@@ -8,6 +8,7 @@ export const members = [
   { id: 'ns', name: 'NS', birthday: 'September 14', state: 'UK', stateName: 'Uttarakhand' },
   { id: 'minnie', name: 'Minnie', birthday: 'September 15', state: 'RJ', stateName: 'Rajasthan' },
   { id: 'dot-sharma', name: 'Dot Sharma', birthday: 'September 25', state: '', stateName: 'Not specified' },
+  { id: 'prahelika', name: 'Prahelika', birthday: 'October 31', state: 'OD', stateName: 'Odisha' },
   { id: 'satya', name: 'Satya', birthday: 'November 11', state: 'AP', stateName: 'Andhra Pradesh' },
   { id: 'invention', name: 'Invention', birthday: 'November 27', state: 'MH', stateName: 'Maharashtra' },
   { id: 'coco', name: 'Coco', birthday: 'December 25', state: 'HP', stateName: 'Himachal Pradesh' },
@@ -23,5 +24,6 @@ export const stateThemes = {
   'UK': 'bg-teal-50 border-teal-200 text-teal-900', // Mountains/forest
   'AP': 'bg-cyan-50 border-cyan-200 text-cyan-900', // Coastal
   'HP': 'bg-slate-50 border-slate-200 text-slate-900', // Snowy pine
+  'OD': 'bg-violet-50 border-violet-200 text-violet-900', // Odisha temple heritage
   'default': 'bg-pink-50 border-pink-200 text-pink-900' // Default pastel
 };
